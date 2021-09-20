@@ -2,6 +2,9 @@ FROM jenkins/jenkins:latest as myjenkins
 USER root
 RUN apt update
 
+# Install jq
+RUN apt install jq
+
 # Install Azure CLI 
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
@@ -29,12 +32,14 @@ RUN apt install -y powershell
 # Install Powershell Azure CLI 
 RUN ["pwsh", "-c", "Install-Module -Name Az -Scope AllUsers -Repository PSGallery -Force"]
 
-# Install Azure Data Studio
-RUN wget https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+# Install DotNet
+RUN wget https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb 
 RUN dpkg -i packages-microsoft-prod.deb
 RUN rm packages-microsoft-prod.deb
-RUN apt update
+RUN apt install -y apt-transport-https
 RUN apt install -y dotnet-sdk-3.1
+
+# Install Azure Data Studio
 RUN apt install -y libnss3 gnupg libxkbfile1 libsecret-1-0 libgtk-3-0 libxss1 libgbm1 libunwind8
 RUN wget -progress=bar:force -q -O azuredatastudio-linux.deb https://go.microsoft.com/fwlink/?linkid=2168339 
 RUN dpkg -i azuredatastudio-linux.deb
@@ -48,12 +53,3 @@ RUN chmod +x /opt/sqlpackage/*
 RUN rm -f /bin/sqlpackage
 RUN ln -s /opt/sqlpackage/sqlpackage /bin/sqlpackage
 RUN rm -rf sqlpackage-linux.zip
-
-# Install DotNet
-RUN wget https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb 
-RUN dpkg -i packages-microsoft-prod.deb
-RUN rm packages-microsoft-prod.deb
-RUN apt update
-RUN apt install -y apt-transport-https
-RUN apt update
-RUN apt install -y dotnet-sdk-3.1
